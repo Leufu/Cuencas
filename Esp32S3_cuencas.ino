@@ -1,18 +1,13 @@
-#include <Wire.h>
-#include <ADS1115_WE.h>
 #include <SPI.h>
 #include <SD.h>
 #include <FS.h>
 
-#define I2C_ADDRESS 0x48
+#include "ADS.h"
 
 // Definiciones para la tarjeta SD
 const int chipSelect = 10;  // Pin CS para la tarjeta SD en la ESP32 
 const char* archivo = "/test.txt";
 File dataFile;
-
-// Crear un objeto para el ADS1115
-ADS1115_WE adc(I2C_ADDRESS);
 
 void setup() {
   Serial.begin(115200);
@@ -78,13 +73,4 @@ void loop() {
   delay(1000);  // Espera 1 segundo antes de la siguiente lectura
 }
 
-float readChannel(ADS1115_MUX channel) {
-  adc.setCompareChannels(channel);
-  float voltage = adc.getResult_V();  // Leer el voltaje en voltios
-  return voltage;
-}
-int16_t readChannelRaw(ADS1115_MUX channel) {
-  adc.setCompareChannels(channel);
-  int16_t rawValue = adc.getRawResult(); // Leer el valor bruto del ADC
-  return rawValue;
-}
+
