@@ -4,6 +4,9 @@
  *
  */
 
+#define SDA0_Pin 8   // select ESP32  I2C pins
+#define SCL0_Pin 9
+
 //////////////////////////////////ADS1115 config/////////////////
 #include<ADS1115_WE.h> 
 #include<Wire.h>

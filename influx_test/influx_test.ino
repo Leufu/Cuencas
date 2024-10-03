@@ -17,9 +17,9 @@
   #include <InfluxDbCloud.h>
   
   // WiFi AP SSID
-  #define WIFI_SSID "COWORK_14K"
+  #define WIFI_SSID "Wifi_14000"
   // WiFi password
-  #define WIFI_PASSWORD "cowork2022"
+  #define WIFI_PASSWORD "wifi14000"
   
   #define INFLUXDB_URL "http://146.83.216.177:8086"
   #define INFLUXDB_TOKEN "0u_MrR7F1lRIK44g-LL44zifmUloCe9jkUtnl-9ylirqZZcC-y3jxkrrEITSvs7xRBrU02DuOvTOsNNJPsW0jQ=="
@@ -35,10 +35,10 @@
   // Declare Data point
   Point sensor("wifi_status");
 ///////////////////////////////////////////////////////////////////////////////////////////////7
-  
-  void setup() {
+void setup() {
     Serial.begin(115200);
     while(!Serial);
+    Wire.begin(SDA0_Pin,SCL0_Pin);
     
     // Setup wifi
     WiFi.mode(WIFI_STA);
