@@ -1,0 +1,24 @@
+#include "ADS.h"
+#include "MicroSD.h"
+
+void setup() {
+  Serial.begin(115200);
+  Wire.begin();
+
+  // Inicializa la tarjeta SD
+  initSD();
+  
+  // Escribir cabecera si es necesario
+ // writeHeader();
+
+  // Inicializa el ADS1115
+  initADS();
+}
+
+void loop() {
+  // Leer datos del ADS1115
+  int16_t rawValue = readChannelRaw(ADS1115_COMP_0_GND);
+
+  // Crear una tarea de FreeRTOS para guardar los datos en la SD
+  createSDTask(rawValue, 1);  // Prioridad baja para la tarea SD
+}
