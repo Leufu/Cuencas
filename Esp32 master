@@ -1,5 +1,8 @@
+#include <Arduino.h>
+#include <Wire.h>
 #include "ADS.h"
 #include "MicroSD.h"
+#include "Task.h"       // Archivo de cabecera para las tareas de FreeRTOS
 
 void setup() {
   Serial.begin(115200);
@@ -13,12 +16,11 @@ void setup() {
 
   // Inicializa el ADS1115
   initADS();
+
+  // Inicializar las tareas de FreeRTOS
+  initTasks();
 }
 
 void loop() {
-  // Leer datos del ADS1115
-  int16_t rawValue = readChannelRaw(ADS1115_COMP_0_GND);
-
-  // Crear una tarea de FreeRTOS para guardar los datos en la SD
-  createSDTask(rawValue, 1);  // Prioridad baja para la tarea SD
+  vTaskDelay(pdMS_TO_TICKS(500));
 }
