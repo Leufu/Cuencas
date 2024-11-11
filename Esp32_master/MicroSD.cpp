@@ -2,11 +2,11 @@
 #include <SPI.h>
 #include <Arduino.h>
 
-#define SD_CS_PIN 10
+#define SD_CS_PIN 10 //Pin CS para la SD en la esp32
 
-// Definir el objeto de archivo de la tarjeta SD
 File dataFile;
 
+//Ahora se mantiene abierta la tajeta SD
 void initSD() {
   Serial.println("Inicializando tarjeta SD...");
   SPI.begin(13, 12, 11, SD_CS_PIN); // SCK=13, MISO=12, MOSI=11, CS=10

@@ -5,7 +5,7 @@
 #include "freertos/task.h"
 #include "freertos/queue.h"
 
-#define QUEUE_LENGTH 1024 * 2
+#define QUEUE_LENGTH 1024 * 2 //Prueba de la queue entre leer y escribir
 #define SAMPLE_RATE_HZ 860
 
 // Manejo global de la cola
@@ -15,6 +15,7 @@ QueueHandle_t dataQueue;
 void vTaskADS(void *pvParameters);
 void vTaskSD(void *pvParameters);
 
+//Función para calcular el tiempo de 860 muestras
 void calcularTiempoCada860Muestras() {
   static unsigned long startTime = micros();  // Tiempo de inicio de la medición
   static int muestraContador = 0;  // Contador de muestras
@@ -28,7 +29,7 @@ void calcularTiempoCada860Muestras() {
 
     // Mostrar el tiempo transcurrido en segundos
     Serial.print("Tiempo para 860 muestras: ");
-    Serial.print(tiempoSegundos, 6);  // Imprime con precisión de 6 decimales
+    Serial.print(tiempoSegundos, 5);  //5 decimales
     Serial.println(" segundos");
 
     // Reiniciar el contador de muestras y el tiempo de inicio
@@ -49,8 +50,8 @@ void initTasks() {
 
   // Crear tareas
   Serial.println("Creando tareas...");
-  xTaskCreatePinnedToCore(vTaskADS, "TaskADS", 4096, NULL, 2, NULL, 0);
-  xTaskCreatePinnedToCore(vTaskSD, "TaskSD", 4096, NULL, 1, NULL, 1);
+  xTaskCreatePinnedToCore(vTaskADS, "TaskADS", 4096, NULL, 2, NULL, 0); //Core 0, 4096 tamaño del stack de la tarea
+  xTaskCreatePinnedToCore(vTaskSD, "TaskSD", 4096, NULL, 1, NULL, 1); //Core 1
   Serial.println("Tareas creadas.");
 }
 
@@ -58,9 +59,8 @@ void initTasks() {
 void vTaskADS(void *pvParameters) {
   Serial.println("vTaskADS iniciada.");
   (void)pvParameters;
-  const TickType_t xFrequency = pdMS_TO_TICKS(1);  // Aproximadamente 1ms de delay
+  const TickType_t xFrequency = pdMS_TO_TICKS(1);  // 1ms de delay (menor tiempo no se puede con el delay de software)
   TickType_t xLastWakeTime = xTaskGetTickCount();
-  unsigned long lastTime = micros();  // Para medir el tiempo entre lecturas
 
   while (1) {
     // Leer el valor del ADC
@@ -85,7 +85,7 @@ void vTaskADS(void *pvParameters) {
 void vTaskSD(void *pvParameters) {
   Serial.println("vTaskSD iniciada.");
   (void)pvParameters;
-  const size_t BUFFER_SIZE = 512;  // Ajustar el tamaño del buffer según sea necesario
+  const size_t BUFFER_SIZE = 512;  // Prueba del buffer con 512bytes
   int16_t buffer[BUFFER_SIZE];
   size_t index = 0;
 
