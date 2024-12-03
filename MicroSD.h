@@ -1,48 +1,38 @@
 #ifndef MICROSD_H
 #define MICROSD_H
 
-#include <SPI.h>
+///#include "MicroSD.h"
 #include <SD.h>
-#include <FS.h>
+#include <SPI.h>
+#include <Arduino.h>
 
-const int chipSelect = 10;  // Pin CS para la tarjeta SD en la ESP32 
-const char* archivo = "/test.txt";
+#define SD_CS_PIN 10 //Pin CS para la SD en la esp32
+
 File dataFile;
+// Declarar el objeto de archivo de la tarjeta SD
+extern File dataFile;
 
+//Ahora se mantiene abierta la tajeta SD
 void initSD() {
-  SPI.begin(13, 12, 11, chipSelect);  // SCK=13, MISO=12, MOSI=11, CS=10
-  
-  if (!SD.begin(chipSelect)) {  
-    Serial.println("Fallo al montar la tarjeta SD.");
-    return;
+  Serial.println("Inicializando tarjeta SD...");
+  SPI.begin(13, 12, 11, SD_CS_PIN); // SCK=13, MISO=12, MOSI=11, CS=10
+  if (!SD.begin(SD_CS_PIN)) {
+    Serial.println("Error al inicializar la tarjeta SD.");
+    while (1);
   }
-  Serial.println("Tarjeta SD montada correctamente.");
+  Serial.println("Tarjeta SD inicializada.");
+
+  dataFile = SD.open("/Prueba2.csv", FILE_WRITE);
+  if (!dataFile) {
+    Serial.println("Error al abrir el archivo en la tarjeta SD.");
+    while (1);
+  }
+  Serial.println("Archivo de datos abierto.");
+
+  // Opcionalmente escribir encabezado
+  // Escribir encabezado con delimitador de coma
+  dataFile.println("Tiempo; Datos"); // Cambiado a coma como delimitador
+  dataFile.flush();
 }
 
-void writeHeader() {
-  if (!SD.exists(archivo)) {
-    dataFile = SD.open(archivo, FILE_WRITE);
-    if (dataFile) {
-      dataFile.println("Lectura de datos desde el ADS1115:");
-      dataFile.println("ADC Value ");
-      dataFile.close();
-      Serial.println("Cabecera escrita correctamente.");
-    } else {
-      Serial.println("Error al abrir el archivo para escritura.");
-    }
-  }
-}
-
-void saveData(int16_t rawValue) {
-  dataFile = SD.open(archivo, FILE_APPEND);
-  if (dataFile) {
-    dataFile.print("ADS0 : ");
-    dataFile.println(rawValue); 
-    dataFile.close();
-    Serial.println("Datos guardados en la tarjeta SD.");
-  } else {
-    Serial.println("Error al abrir el archivo para escritura.");
-  }
-}
-
-#endif
+#endif // MICROSD_H
