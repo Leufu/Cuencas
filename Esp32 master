@@ -2,25 +2,23 @@
 #include <Wire.h>
 #include "ADS.h"
 #include "MicroSD.h"
-#include "Task.h"       // Archivo de cabecera para las tareas de FreeRTOS
+#include "Task.h"
+#include "RTC.h" // Incluir el archivo de inicialización del RTC
+
 
 void setup() {
   Serial.begin(115200);
+  Serial.println("Iniciando setup...");
   Wire.begin();
 
-  // Inicializa la tarjeta SD
   initSD();
-  
-  // Escribir cabecera si es necesario
- // writeHeader();
-
-  // Inicializa el ADS1115
   initADS();
-
-  // Inicializar las tareas de FreeRTOS
   initTasks();
+  initRTC();  // Inicializa el RTC
+
+  Serial.println("Setup completado.");
 }
 
 void loop() {
-  vTaskDelay(pdMS_TO_TICKS(500));
+  // Bucle vacío ya que las tareas son manejadas por FreeRTOS al ejecutar initTasks()
 }
