@@ -13,8 +13,9 @@ void setup() {
 
   initSD();
   initADS();
+  initRTC();  // Inicializa el RTC  
   initTasks();
-  initRTC();  // Inicializa el RTC
+  
 
   Serial.println("Setup completado.");
 }
