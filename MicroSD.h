@@ -30,8 +30,7 @@ void initSD() {
   Serial.println("Archivo de datos abierto.");
 
   // Opcionalmente escribir encabezado
-  // Escribir encabezado con delimitador de coma
-  dataFile.println("Tiempo; Datos"); // Cambiado a coma como delimitador
+  dataFile.println("Datos; Datos1; Datos2"); // Cambiado a coma como delimitador
   dataFile.flush();
 }
 
