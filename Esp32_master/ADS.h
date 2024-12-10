@@ -6,7 +6,7 @@
 #include <Wire.h>
 #include <Arduino.h>
 
-#include <ADS1115_WE.h>
+#include <ADS1015_WE.h>
 
 // Dirección I2C de los ADS1015 
 

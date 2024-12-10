@@ -11,9 +11,9 @@ void setup() {
   Serial.println("Iniciando setup...");
   Wire.begin();
 
+  initRTC();  // Inicializa el RTC  
   initSD();
   initADS();
-  initRTC();  // Inicializa el RTC  
   initTasks();
   
 
