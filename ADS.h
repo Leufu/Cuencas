@@ -8,32 +8,51 @@
 
 #include <ADS1115_WE.h>
 
-#define I2C_ADDRESS 0x48
+// Dirección I2C de los ADS1015 
+
+#define I2C_ADDRESS_1  0x48 
+#define I2C_ADDRESS_2  0x49
+
 #define INTERRUPT_PIN 18 // Pin conectado al ALERT del ADS1115
 
-// Definir el objeto ADC
-ADS1115_WE adc(I2C_ADDRESS);
+// Definir los objetos ADC
+ADS1015_WE adc_1(I2C_ADDRESS_1);
+ADS1015_WE adc_2(I2C_ADDRESS_2);
 
 // Configuración de pines
 //pinMode(INTERRUPT_PIN, INPUT_PULLUP); // Pin ALERT
 
+// Inicializar los ADCs
 void initADS() {
-  Serial.println("Inicializando ADS1115...");
-  if (!adc.init()) {
-    Serial.println("Error al inicializar ADS1115.");
-    while (1);
+  Serial.println("Inicializando ADCs...");
+
+  // Inicializar ADC 1
+  if (!adc_1.init()) {
+    Serial.println("ADS1115 No 1 not connected!");
+    while (1); // Detiene la ejecución si no se detecta el dispositivo
   }
-  Serial.println("ADS1115 inicializado.");
-  // Configuración de pines
-  pinMode(INTERRUPT_PIN, INPUT_PULLUP); // Pin ALERT
-  adc.setVoltageRange_mV(ADS1115_RANGE_6144);    // Rango de voltaje +/- 6.144V
-  adc.setCompareChannels(ADS1115_COMP_0_GND);    // Leer del canal 0
-  adc.setConvRate(ADS1115_860_SPS  );              // Configurar tasa de conversión a 860 SPS
-  adc.setMeasureMode(ADS1115_CONTINUOUS);        // Modo continuo
-  adc.setAlertModeAndLimit_V(ADS1115_WINDOW, 8.0, 2.0); // Configurar el modo de la salida ALERT como ventana
-  adc.setAlertPinMode(ADS1115_ASSERT_AFTER_1); // Configurar el pin ALERT para que active inmediatamente
+  adc_1.setVoltageRange_mV(ADS1015_RANGE_4096);
+  adc_1.setConvRate(ADS1015_1600_SPS);
+  adc_1.setMeasureMode(ADS1015_CONTINUOUS);
 
+  // Inicializar ADC 2
+  if (!adc_2.init()) {
+    Serial.println("ADS1115 No 2 not connected!");
+    while (1); // Detiene la ejecución si no se detecta el dispositivo
+  }
+  adc_2.setVoltageRange_mV(ADS1015_RANGE_4096);
+  adc_2.setConvRate(ADS1015_920_SPS);
+  adc_2.setMeasureMode(ADS1015_CONTINUOUS);
 
+  Serial.println("ADCs inicializados correctamente.");
+}
+
+// Leer el valor crudo de un canal específico
+int16_t readRawChannel(ADS1015_WE &adc, ADS1015_MUX channel) {
+  adc.setCompareChannels(channel);
+  adc.startSingleMeasurement();
+ 
+  return adc.getRawResult();
 }
 
 #endif // ADS_H
