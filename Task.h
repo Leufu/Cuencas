@@ -15,11 +15,18 @@
 #include <RTClib.h>
 
 
-#define QUEUE_LENGTH 1024 * 10//Prueba de la queue entre leer y escribir
+#define QUEUE_LENGTH 1024 * 1//Prueba de la queue entre leer y escribir
 #define SAMPLE_RATE_HZ 860  
 
 // Manejo global de la cola
 QueueHandle_t dataQueue;
+
+typedef struct {
+    //uint32_t timestamp;   // Marca de tiempo (en milisegundos) Puede ir el RTC 
+    int16_t adcValue1;    // Valor del ADC1 Canal 0-1
+    int16_t adcValue2;    // Valor del ADC1 Canal 2-3
+    int16_t adcValue3;    // Valor del ADC2 Canal 0-1
+} DataSample;
 
 // Prototipos de funciones para tareas
 void vTaskADS(void *pvParameters);
@@ -69,31 +76,28 @@ void initTasks() {
 void vTaskADS(void *pvParameters) {
   Serial.println("vTaskADS iniciada.");
   (void)pvParameters;
-  const TickType_t xFrequency = pdMS_TO_TICKS(1);  // 1ms de delay (menor tiempo no se puede con el delay de software)
-  TickType_t xLastWakeTime = xTaskGetTickCount();
+  /*const TickType_t xFrequency = pdMS_TO_TICKS(1);  // 1ms de delay (menor tiempo no se puede con el delay de software)
+  TickType_t xLastWakeTime = xTaskGetTickCount();*/
 
   while (1) {
-    // Verifica si el pin ALERT está en alto
-   // if (digitalRead(INTERRUPT_PIN) == HIGH) {
       // Leer el valor del ADC
-      int16_t adcValue = adc.getRawResult();
-      /*Serial.print("Valor crudo: ");
-      Serial.println(adcValue);*/
+        DataSample sample;
+        //sample.timestamp = millis();  // Registrar marca de tiempo(opcional)
+        sample.adcValue1 = readRawChannel(adc_1, ADS1015_COMP_0_1); // Canal 0-1 del ADC 1
+        sample.adcValue2 = readRawChannel(adc_1, ADS1015_COMP_2_3); // Canal 2-3 del ADC 1
+        sample.adcValue3 = readRawChannel(adc_2, ADS1015_COMP_0_1); // Canal 0-1 del ADC 2
     
 
 
     calcularTiempoCada860Muestras();
 
        // Enviar el valor a la cola
-      if (xQueueSend(dataQueue, &adcValue, 0) != pdPASS) {
+      if (xQueueSend(dataQueue, &sample, 0) != pdPASS) {
         Serial.println("La cola de datos está llena. Muestra perdida.");
       }
-    //} else {
-     // Serial.println("Pin ALERT no activado. Saltando lectura...");
-   // }
 
     // Esperar para el siguiente ciclo
-    vTaskDelayUntil(&xLastWakeTime, xFrequency);
+   // vTaskDelayUntil(&xLastWakeTime, xFrequency);
   }
 }
 
@@ -103,39 +107,33 @@ void vTaskSD(void *pvParameters) {
   Serial.println("vTaskSD iniciada.");
   (void)pvParameters;
   const size_t BUFFER_SIZE = 512*1;  // Prueba del buffer con 512bytes
-  int16_t buffer[BUFFER_SIZE];
+  DataSample buffer[BUFFER_SIZE];  // Buffer para almacenar muestras antes de escribir
   size_t index = 0;
 
   while (1) {
+    
+    DataSample sample;
     // Recibir datos de la cola
-    if (xQueueReceive(dataQueue, &buffer[index], portMAX_DELAY) == pdPASS) {
+    if (xQueueReceive(dataQueue, &sample, portMAX_DELAY) == pdPASS) {
+   
+      // Guardar en el buffer
+      buffer[index++] = sample;
 
-
-      index++;
-
-      // Si el buffer está lleno, escribir en la tarjeta SD
+   // Si el buffer está lleno, escribir en la tarjeta SD
       if (index >= BUFFER_SIZE) {
         Serial.println("Buffer lleno. Escribiendo en tarjeta SD...");
         // Escribir datos en la tarjeta SD
         for (size_t i = 0; i < BUFFER_SIZE; i++) {
-          DateTime now = rtc.now();
-          // Formato: "dd/mm/yyyy,hh:mm:ss,valor"
-          //dataFile.print(now.day());
-          //dataFile.print("/");
-          //dataFile.print(now.month());
-          //dataFile.print("/");
-          //dataFile.print(now.year());
-          //dataFile.print(",");
-          dataFile.print(now.hour());
-          dataFile.print(":");
-          dataFile.print(now.minute());
-          dataFile.print(":");
-          dataFile.print(now.second());
-          dataFile.print(";");
-          dataFile.println(buffer[i]);    // Valor del ADC
+           dataFile.print(buffer[i].adcValue1);
+           dataFile.print(";");
+           dataFile.print(buffer[i].adcValue2);
+           dataFile.print(";");
+           dataFile.println(buffer[i].adcValue3);
+         // dataFile.println(buffer[i]);    // Valor del ADC     
         }
         dataFile.flush();  // Asegurar que los datos se escriben en la tarjeta SD
         Serial.println("Datos escritos en la tarjeta SD.");
+
 
         // Reiniciar índice
         index = 0;
