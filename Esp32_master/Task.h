@@ -66,7 +66,10 @@ void calcularTiempoCada860Muestras() {
 void initTasks() {
   Serial.println("Creando cola de datos...");
   // Crear la cola
-  dataQueue = xQueueCreate(QUEUE_LENGTH, sizeof(int16_t));
+  // se modifica el sizeof para que tenga el tamaño del struct 
+  dataQueue = xQueueCreate(QUEUE_LENGTH, sizeof(DataSample));
+  //by pp
+  //////////////////////////////////////////////////////////////
   if (dataQueue == NULL) {
     Serial.println("Error al crear la cola de datos.");
     while (1);
