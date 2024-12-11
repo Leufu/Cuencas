@@ -13,6 +13,7 @@
 
 //#include <RTClib.h>
 #include <RTClib.h>
+#include <cstdint>
 
 
 #define QUEUE_LENGTH 1024 * 1//Prueba de la queue entre leer y escribir
@@ -21,12 +22,18 @@
 // Manejo global de la cola
 QueueHandle_t dataQueue;
 
-typedef struct {
+typedef struct 
+{
     //uint32_t timestamp;   // Marca de tiempo (en milisegundos) Puede ir el RTC 
     int16_t adcValue1;    // Valor del ADC1 Canal 0-1
     int16_t adcValue2;    // Valor del ADC1 Canal 2-3
     int16_t adcValue3;    // Valor del ADC2 Canal 0-1
 } DataSample;
+
+//variable para tomar un dato de ADC que no se guardará
+int16_t Var_basura;
+
+/////////////////////////
 
 // Prototipos de funciones para tareas
 void vTaskADS(void *pvParameters);
@@ -40,7 +47,8 @@ void calcularTiempoCada860Muestras() {
   muestraContador++;
 
   // Verifica si hemos alcanzado 860 muestras
-  if (muestraContador >= 860) {
+  if (muestraContador >= 860)
+  {
     unsigned long endTime = micros();  // Tiempo actual
     float tiempoSegundos = (endTime - startTime) / 1e6;  // Convertir de microsegundos a segundos
 
@@ -86,7 +94,7 @@ void vTaskADS(void *pvParameters) {
         sample.adcValue1 = readRawChannel(adc_1, ADS1015_COMP_0_1); // Canal 0-1 del ADC 1
         sample.adcValue2 = readRawChannel(adc_1, ADS1015_COMP_2_3); // Canal 2-3 del ADC 1
         sample.adcValue3 = readRawChannel(adc_2, ADS1015_COMP_0_1); // Canal 0-1 del ADC 2
-    
+    		Var_basura= readRawChannel(adc_2, ADS1015_COMP_0_2);
 
 
     calcularTiempoCada860Muestras();

@@ -11,7 +11,7 @@ void setup() {
   Serial.println("Iniciando setup...");
   Wire.begin();
 
-  initRTC();  // Inicializa el RTC  
+  initRTC();  // se Inicializa el RTC primero para evitar memory fault al iniciar la SD  
   initSD();
   initADS();
   initTasks();
