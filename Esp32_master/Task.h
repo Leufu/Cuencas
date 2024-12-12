@@ -1,4 +1,4 @@
-#ifndef TASKS_H
+#ifndef TASKS_g
 #define TASKS_H
 
 #include <Arduino.h>
@@ -18,7 +18,7 @@
 
 #define QUEUE_LENGTH 1024 * 1//Prueba de la queue entre leer y escribir
 #define SAMPLE_RATE_HZ 860  
-
+#define numero_de_muestras 860
 // Manejo global de la cola
 QueueHandle_t dataQueue;
 
@@ -26,8 +26,8 @@ typedef struct
 {
     //uint32_t timestamp;   // Marca de tiempo (en milisegundos) Puede ir el RTC 
     int16_t adcValue1;    // Valor del ADC1 Canal 0-1
-    int16_t adcValue2;    // Valor del ADC1 Canal 2-3
-    int16_t adcValue3;    // Valor del ADC2 Canal 0-1
+    //int16_t adcValue2;    // Valor del ADC1 Canal 2-3
+    //int16_t adcValue3;    // Valor del ADC2 Canal 0-1
 } DataSample;
 
 //variable para tomar un dato de ADC que no se guardará
@@ -47,7 +47,7 @@ void calcularTiempoCada860Muestras() {
   muestraContador++;
 
   // Verifica si hemos alcanzado 860 muestras
-  if (muestraContador >= 860)
+  if (muestraContador >= numero_de_muestras)
   {
     unsigned long endTime = micros();  // Tiempo actual
     float tiempoSegundos = (endTime - startTime) / 1e6;  // Convertir de microsegundos a segundos
@@ -78,7 +78,7 @@ void initTasks() {
 
   // Crear tareas
   Serial.println("Creando tareas...");
-  xTaskCreatePinnedToCore(vTaskADS, "TaskADS", 4096*2, NULL, 10, NULL, 0); //Core 0, 4096 tamaño del stack de la tarea
+  xTaskCreatePinnedToCore(vTaskADS, "TaskADS", 4096*2, NULL, 10, &adcTaskHandle, 0); //Core 0, 4096 tamaño del stack de la tarea
   xTaskCreatePinnedToCore(vTaskSD, "TaskSD", 4096*2, NULL, 5, NULL, 1); //Core 1
   Serial.println("Tareas creadas.");
 }
@@ -90,14 +90,17 @@ void vTaskADS(void *pvParameters) {
   /*const TickType_t xFrequency = pdMS_TO_TICKS(1);  // 1ms de delay (menor tiempo no se puede con el delay de software)
   TickType_t xLastWakeTime = xTaskGetTickCount();*/
 
-  while (1) {
-      // Leer el valor del ADC
-        DataSample sample;
-        //sample.timestamp = millis();  // Registrar marca de tiempo(opcional)
-        sample.adcValue1 = readRawChannel(adc_1, ADS1015_COMP_0_1); // Canal 0-1 del ADC 1
-        sample.adcValue2 = readRawChannel(adc_1, ADS1015_COMP_2_3); // Canal 2-3 del ADC 1
-        sample.adcValue3 = readRawChannel(adc_2, ADS1015_COMP_0_1); // Canal 0-1 del ADC 2
-    		Var_basura= readRawChannel(adc_2, ADS1015_COMP_0_2);
+  while (1) 
+  {
+	  ulTaskNotifyTake(pdTRUE,portMAX_DELAY);
+	  //
+     // Leer el valor del ADC
+	  DataSample sample;
+	  //sample.timestamp = millis();  // Registrar marca de tiempo(opcional)
+     sample.adcValue1 = readRawChannel_11(adc_1, ADS1115_COMP_0_GND); // Canal 0-1 del ADC 1
+        //sample.adcValue2 = readRawChannel(adc_1, ADS1015_COMP_2_3); // Canal 2-3 del ADC 1
+        //sample.adcValue3 = readRawChannel(adc_2, ADS1015_COMP_0_1); // Canal 0-1 del ADC 2
+    		//Var_basura= readRawChannel(adc_2, ADS1015_COMP_0_3);
 
 
     calcularTiempoCada860Muestras();
@@ -111,7 +114,6 @@ void vTaskADS(void *pvParameters) {
    // vTaskDelayUntil(&xLastWakeTime, xFrequency);
   }
 }
-
 
 // Tarea de escritura
 void vTaskSD(void *pvParameters) {
@@ -135,11 +137,11 @@ void vTaskSD(void *pvParameters) {
         Serial.println("Buffer lleno. Escribiendo en tarjeta SD...");
         // Escribir datos en la tarjeta SD
         for (size_t i = 0; i < BUFFER_SIZE; i++) {
-           dataFile.print(buffer[i].adcValue1);
-           dataFile.print(";");
-           dataFile.print(buffer[i].adcValue2);
-           dataFile.print(";");
-           dataFile.println(buffer[i].adcValue3);
+           dataFile.println(buffer[i].adcValue1);
+           //dataFile.print(";");
+           //dataFile.print(buffer[i].adcValue2);
+           //dataFile.print(";");
+           //dataFile.println(buffer[i].adcValue3);
          // dataFile.println(buffer[i]);    // Valor del ADC     
         }
         dataFile.flush();  // Asegurar que los datos se escriben en la tarjeta SD

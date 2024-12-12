@@ -21,18 +21,17 @@ void create_header()
 	 // que se use el dispositivo.
 	 //
 	Serial.println("ENtra en lafuncion ");
-	DateTime tiempo_actual_rtc = rtc.now();
-   char nombre[35]; 
-	
-	Serial.println("Se crea nombre");
-
+	//DateTime tiempo_actual_rtc = rtc.now();
+   const char nombre[20]= "/Test_interrupt.csv";
+	//Serial.println("Se crea nombre");
+	/*
    sprintf(nombre, "/%04d-%02d-%02d_%02d-hh-%02d-mm.csv", 
             tiempo_actual_rtc.year(), 
             tiempo_actual_rtc.month(), 
             tiempo_actual_rtc.day(),
             tiempo_actual_rtc.hour(), 
             tiempo_actual_rtc.minute());
-
+	*/
    Serial.print("Nombre del archivo: ");
    Serial.println(nombre);
 	 
