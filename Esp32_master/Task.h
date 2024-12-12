@@ -17,17 +17,17 @@
 
 
 #define QUEUE_LENGTH 1024 * 1//Prueba de la queue entre leer y escribir
-#define SAMPLE_RATE_HZ 860  
-#define numero_de_muestras 860
+#define SAMPLE_RATE_HZ 1600  
+#define numero_de_muestras 1600
 // Manejo global de la cola
 QueueHandle_t dataQueue;
 
 typedef struct 
 {
-    //uint32_t timestamp;   // Marca de tiempo (en milisegundos) Puede ir el RTC 
     int16_t adcValue1;    // Valor del ADC1 Canal 0-1
-    //int16_t adcValue2;    // Valor del ADC1 Canal 2-3
+    int16_t adcValue2;    // Valor del ADC1 Canal 2-3
     //int16_t adcValue3;    // Valor del ADC2 Canal 0-1
+    uint32_t timestamp;   // Marca de tiempo (en milisegundos) Puede ir el RTC 
 } DataSample;
 
 //variable para tomar un dato de ADC que no se guardará
@@ -97,18 +97,16 @@ void vTaskADS(void *pvParameters) {
      // Leer el valor del ADC
 	  DataSample sample;
 	  //sample.timestamp = millis();  // Registrar marca de tiempo(opcional)
-     sample.adcValue1 = readRawChannel_11(adc_1, ADS1115_COMP_0_GND); // Canal 0-1 del ADC 1
-        //sample.adcValue2 = readRawChannel(adc_1, ADS1015_COMP_2_3); // Canal 2-3 del ADC 1
+     sample.adcValue1 = readRawChannel(adc_1, ADS1015_COMP_0_1); // Canal 0-1 del ADC 1
+      sample.adcValue2 = readRawChannel(adc_1, ADS1015_COMP_2_3); // Canal 2-3 del ADC 1
         //sample.adcValue3 = readRawChannel(adc_2, ADS1015_COMP_0_1); // Canal 0-1 del ADC 2
     		//Var_basura= readRawChannel(adc_2, ADS1015_COMP_0_3);
-
+		sample.timestamp=esp_timer_get_time()/1000;	
 
     calcularTiempoCada860Muestras();
 
        // Enviar el valor a la cola
-      if (xQueueSend(dataQueue, &sample, 0) != pdPASS) {
-        Serial.println("La cola de datos está llena. Muestra perdida.");
-      }
+      if (xQueueSend(dataQueue, &sample, 0) != pdPASS) {Serial.println("La cola de datos está llena. Muestra perdida.");}
 
     // Esperar para el siguiente ciclo
    // vTaskDelayUntil(&xLastWakeTime, xFrequency);
@@ -137,10 +135,14 @@ void vTaskSD(void *pvParameters) {
         Serial.println("Buffer lleno. Escribiendo en tarjeta SD...");
         // Escribir datos en la tarjeta SD
         for (size_t i = 0; i < BUFFER_SIZE; i++) {
-           dataFile.println(buffer[i].adcValue1);
-           //dataFile.print(";");
-           //dataFile.print(buffer[i].adcValue2);
-           //dataFile.print(";");
+           dataFile.print(buffer[i].adcValue1);
+           dataFile.print(";");
+           dataFile.print(buffer[i].adcValue2);
+           dataFile.print(";");
+			  dataFile.print(buffer[i].timestamp);
+           dataFile.println(";");
+
+
            //dataFile.println(buffer[i].adcValue3);
          // dataFile.println(buffer[i]);    // Valor del ADC     
         }

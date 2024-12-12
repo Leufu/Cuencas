@@ -56,7 +56,7 @@ void create_header()
 	 dataFile.println("////////////////////////////////////////");
 	 dataFile.println("////////////////////////////////////////");
 	 // Opcionalmente escribir encabezado
-	 dataFile.println("Datos; Datos1; Datos2"); // Cambiado a coma como delimitador
+	 dataFile.println("Datos; Datos1; TimeSpan"); // Cambiado a coma como delimitador
 	 dataFile.flush();
 
 	 
