@@ -12,7 +12,9 @@
 
 #define I2C_ADDRESS_1  0x48 
 //#define I2C_ADDRESS_2  0x49
-
+// Pines I2C para ESP32-S3
+#define SDA_PIN 8
+#define SCL_PIN 9
 
 
 #define INTERRUPT_PIN 4 // Pin conectado al ALERT del ADS1115
@@ -45,7 +47,11 @@ ADS1015_WE adc_1(I2C_ADDRESS_1);
 // Inicializar los ADCs
 void initADS() {
   Serial.println("Inicializando ADCs...");
-
+	  // Inicia el bus I2C con velocidad personalizada
+  Wire.begin(SDA_PIN, SCL_PIN);        // Configura los pines SDA y SCL
+  Wire.setClock(3400000);             // Configura la velocidad I2C a 3.4 MHz (máximo soportado)
+  Serial.println("I2C configurado a alta velocidad (3.4 MHz)");
+  delay(500);
   // Inicializar ADC 1
   if (!adc_1.init()) {
     Serial.println("ADS1015 No 1 not connected!");
@@ -61,8 +67,8 @@ void initADS() {
 	adc_1.setAlertPinMode(ADS1015_ASSERT_AFTER_1);
 	adc_1.setAlertPinToConversionReady();
 	attachInterrupt(digitalPinToInterrupt(INTERRUPT_PIN), onDataReadyISR, FALLING);
-   //adc_1.startSingleMeasurement();
-   adc_1.setMeasureMode(ADS1115_CONTINUOUS); 
+   adc_1.startSingleMeasurement();
+   //adc_1.setMeasureMode(ADS1115_CONTINUOUS); 
 
   // Inicializar ADC 2
   /*
@@ -81,9 +87,9 @@ void initADS() {
 
 int16_t readRawChannel(ADS1015_WE &adc, ADS1015_MUX channel) {
   //adc.setConvRate(ADS1015_3300_SPS);
-	adc.setCompareChannels(channel);
-  //adc.startSingleMeasurement();
- 
+  adc.setCompareChannels(channel);
+  adc.startSingleMeasurement();
+  //while(adc.isBusy()){}
   return adc.getRawResult();
 }
 

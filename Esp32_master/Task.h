@@ -95,13 +95,14 @@ void vTaskADS(void *pvParameters) {
 	  ulTaskNotifyTake(pdTRUE,portMAX_DELAY);
 	  //
      // Leer el valor del ADC
+  	  //adc_1.setConvRate(ADS1015_3300_SPS);
 	  DataSample sample;
 	  //sample.timestamp = millis();  // Registrar marca de tiempo(opcional)
      sample.adcValue1 = readRawChannel(adc_1, ADS1015_COMP_0_1); // Canal 0-1 del ADC 1
       sample.adcValue2 = readRawChannel(adc_1, ADS1015_COMP_2_3); // Canal 2-3 del ADC 1
         //sample.adcValue3 = readRawChannel(adc_2, ADS1015_COMP_0_1); // Canal 0-1 del ADC 2
     		//Var_basura= readRawChannel(adc_2, ADS1015_COMP_0_3);
-		sample.timestamp=esp_timer_get_time()/1000;	
+		sample.timestamp=esp_timer_get_time();	
 
     calcularTiempoCada860Muestras();
 
